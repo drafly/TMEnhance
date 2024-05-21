@@ -1,0 +1,105 @@
+#### general settings
+name: tonemapping
+model: tonemapping_GAN
+use_tb_logger: false
+distortion: sr
+scale: 1
+gpu_ids: [0]
+
+#### datasets
+datasets:
+  train:
+    name: HDR10-DIV2K
+    mode: LQGT_tonemapping
+    dataroot_HDR: /root/autodl-tmp/dataset/HDRTV1k/train_set/train_hdr_sub
+    dataroot_cond: /root/autodl-tmp/dataset/HDRTV1k/train_set/cond_hdr
+    dataroot_SDR: /root/autodl-tmp/dataset/HDRTV1k/train_set/train_sdr_sub
+    dataroot_L_Ref: /root/autodl-tmp/dataset/HDRTV1k/train_set/train_sdr_sub
+    dataroot_M_Ref: /root/autodl-tmp/dataset/HDRTV1k/train_set/train_sdr_sub
+    dataroot_H_Ref: /root/autodl-tmp/dataset/HDRTV1k/train_set/train_sdr_sub
+    cond_scale: 4
+    use_shuffle: true
+    n_workers: 8 # 4 | 8
+    batch_size: 16 # 4 | 8 | 16
+    GT_size: 128 # 128 | 160 | 480 
+    use_flip: false
+    use_rot: false
+  val:
+    name: HDR10-DIV2K
+    mode: LQGT_tonemapping
+    dataroot_HDR: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_hdr
+    dataroot_cond: /root/autodl-tmp/dataset/HDRTV1k/test_set/cond_hdr
+    dataroot_SDR: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_sdr
+    dataroot_L_Ref: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_sdr
+    dataroot_M_Ref: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_sdr
+    dataroot_H_Ref: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_sdr
+    cond_scale: 4
+    save_img: false
+
+#### network structures
+network_G:
+  which_model_G: Condition_and_SRResNet
+  # ConditionNet
+  classifier: color_condition 
+  cond_c: 6
+  # SRResNet
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 16
+  act_type: relu # | leakyrelu
+
+network_D:
+  which_model_D: multiLayerD_simpleD # multiLayerD_simpleD | discriminator_vgg_128
+  GT_size: 128 # 同datasets GT_size
+  in_nc: 3
+  nf: 16 # 16 | 64
+  d_nlayers: 3
+  d_norm: none
+  d_last_activation: sigmoid
+  num_D: 3  # 相同架构的判别器数量
+  d_fully_connected: 0  # 是否包含全连接层
+  simpleD_maxpool: 0  # 是否包含最大池化层
+  d_padding: 0
+
+  
+#### path
+path:
+  root: ./
+  # pretrain_model_G: 
+  strict_load: false
+  # resume_state: 
+
+#### training settings: learning rate scheme, loss
+train:
+  lr_G: !!float 1e-4 # 5e-4 | 2e-4 | 1e-4
+  weight_decay_G: 0
+  beta1_G: 0.9
+  beta2_G: 0.99
+  lr_D: !!float 1e-4
+  weight_decay_D: 0
+  beta1_D: 0.9
+  beta2_D: 0.99
+  lr_scheme: MultiStepLR
+
+  niter: 400000
+  warmup_iter: -1  # no warm up
+  lr_steps: [50000, 100000, 200000, 300000]
+  lr_gamma: 0.5
+
+  # 损失和权重
+  region_color_criterion: l1
+  region_color_weight: 1
+  gan_type: gan 
+  gan_weight: !!float 5e-3
+
+  D_update_ratio: 1
+  D_init_iters: 0
+
+  manual_seed: 10
+  val_freq: !!float 5e3
+
+#### logger
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5e3

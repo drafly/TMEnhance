@@ -1,0 +1,34 @@
+name: tonemapping
+model: tonemapping_GAN
+distortion: sr
+scale: 1
+gpu_ids: [0]
+
+datasets:
+  test_1:  # the 1st test dataset
+    name: test_set
+    mode: LQGT_tonemapping
+    dataroot_LQ: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_hdr
+    dataroot_cond: /root/autodl-tmp/dataset/HDRTV1k/test_set/cond_hdr
+    dataroot_GT: /root/autodl-tmp/dataset/HDRTV1k/test_set/test_sdr
+    cond_scale: 4
+
+#### network structures
+network_G:
+  which_model_G: Condition_and_SRResNet
+  # ConditionNet
+  classifier: color_condition 
+  cond_c: 6
+  # SRResNet
+  in_nc: 3
+  out_nc: 3
+  nf: 64
+  nb: 16
+  act_type: relu # | leakyrelu
+
+#### path
+path:
+  root: ./
+  results_img_root: /root/autodl-tmp/dataset/HDRTV1k/  # Kepler
+  pretrain_model_G: ../experiments/tonemapping/models/90000_G.pth
+  # pretrain_model_G: ../pretrained_models/AGCM_G.pth

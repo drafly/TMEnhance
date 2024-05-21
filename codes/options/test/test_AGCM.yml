@@ -1,0 +1,36 @@
+name: adaptive_global_color_mapping
+model: condition
+distortion: sr
+scale: 1
+gpu_ids: [1]
+
+datasets:
+  # test_1:  # the 1st test dataset
+  #   name: test_set
+  #   mode: LQGT_condition
+  #   dataroot_LQ: /data/dataset/xiaozhou/HDRTV1k/test_set/test_sdr
+  #   dataroot_cond: /data/dataset/xiaozhou/HDRTV1k/test_set/cond
+  #   dataroot_GT: /data/dataset/xiaozhou/HDRTV1k/test_set/test_hdr
+  #   cond_scale: 4
+
+  test_1:  # the 1st test dataset
+    name: train_set_sub
+    mode: LQGT_condition
+    dataroot_LQ: /data/dataset/xiaozhou/HDRTV1k/train_set/train_sdr_sub
+    dataroot_cond: /data/dataset/xiaozhou/HDRTV1k/train_set/cond
+    dataroot_GT: /data/dataset/xiaozhou/HDRTV1k/train_set/train_hdr_sub
+    cond_scale: 4
+
+#### network structures
+network_G:
+  which_model_G: ConditionNet
+  classifier: color_condition 
+  cond_c: 6
+
+#### path
+path:
+  root: ./
+  results_img_root: /data/dataset/xiaozhou/HDRTV1k  # Kepler
+  pretrain_model_G: ../experiments/adaptive_global_color_mapping/models/latest_G.pth
+  # pretrain_model_G: ../pretrained_models/AGCM_G.pth
+
